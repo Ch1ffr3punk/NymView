@@ -10,20 +10,17 @@ use crate::config;
 pub struct NymMixnetServer {
     nym_client: mixnet::MixnetClient,
     sites_dir: PathBuf,
-    pub nym_address: String,
+    // pub nym_address: String,
     cache: Arc<RwLock<HashMap<String, String>>>,
 }
 
 impl NymMixnetServer {
     pub async fn new(sites_directory: &str) -> Result<Self, Box<dyn std::error::Error>> {
-        // PERSISTENT CLIENT with configuration directory
         let config_dir = config::ensure_config_dir()?;
-        let client_path = config_dir.join("mixnet_client");
         
-        println!("Persistent client path: {:?}", client_path);
+        println!("Persistence directory: {:?}", config_dir);
         
-        // FIXED: Final API with type conversion
-        let storage_paths = nym_sdk::mixnet::StoragePaths::new_from_dir(&client_path)?;
+        let storage_paths = nym_sdk::mixnet::StoragePaths::new_from_dir(&config_dir)?;
         let storage = nym_sdk::mixnet::OnDiskPersistent::from_paths(
             storage_paths.into(), // .into() for type conversion
             &Default::default(),
@@ -45,12 +42,10 @@ impl NymMixnetServer {
         
         println!("NymView Server started: {}", nym_address);
         println!("Hosting from: {:?}", sites_dir);
-        println!("Persistent keys saved in: {:?}", config_dir);
         
         Ok(Self {
             nym_client: connected_client,
             sites_dir,
-            nym_address,
             cache: Arc::new(RwLock::new(cache)),
         })
     }
@@ -115,7 +110,6 @@ This server hosts pages via the **Nym Mixnet**.
                                     if let Err(e) = self.nym_client.send_plain_message(recipient, response).await {
                                         eprintln!("Error sending response: {}", e);
                                     }
-                                    // Keine "Response sent successfully" Ausgabe mehr
                                 }
                                 Err(e) => {
                                     eprintln!("Invalid response address: {}", e);
@@ -194,9 +188,5 @@ This server hosts pages via the **Nym Mixnet**.
             }
             Err(e) => format!("ERROR: Error reloading: {}", e),
         }
-    }
-    
-    pub fn get_nym_address(&self) -> &str {
-        &self.nym_address
     }
 }

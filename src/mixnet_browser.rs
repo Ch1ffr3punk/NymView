@@ -342,9 +342,9 @@ impl NymMixnetBrowser {
 
         ScrollArea::vertical().show(ui, |ui| {
             if self.page_loading {
-                ui.vertical_centered(|ui| {
-                    ui.spinner();
-                    ui.colored_label(Color32::BLUE, "Loading via Mixnet...");
+                ui.vertical_centered(|_ui| {
+                    // ui.spinner();
+                    // ui.colored_label(Color32::BLUE, "Loading via Mixnet...");
                 });
             } else if self.current_content.is_empty() {
                 self.show_welcome_page(ui);
